@@ -1,0 +1,726 @@
+blueprint:
+  name: IKEA BILRESA Scroll Wheel Controller (Matter)
+  description: |
+    Contrôlez jusqu'à 3 lumières avec la télécommande IKEA BILRESA connectée en Matter.
+
+    **Fonctionnalités:**
+    - 3 positions LED pour contrôler 3 lumières différentes
+    - Rotation de la molette pour ajuster la luminosité
+    - Clics simples, doubles, triples et appui long sur la molette
+    - Configuration flexible des actions
+
+    **Utilisation:**
+    - Utilisez le bouton sous les LEDs pour changer de position (LED 1, 2 ou 3)
+    - Tournez la molette pour ajuster la luminosité de la lumière active
+    - Cliquez sur la molette pour allumer/éteindre ou effectuer d'autres actions
+  domain: automation
+  source_url: https://github.com/your-repo/blueprints/blob/main/automation/ikea_bilresa_matter.yaml
+
+  input:
+    # Entités de boutons - Position 1 (LED 1)
+    button_1_entity:
+      name: Bouton 1 (Rotation horaire - LED 1)
+      description: Entité event pour la rotation dans le sens horaire en position 1
+      selector:
+        entity:
+          filter:
+            - domain: event
+          multiple: false
+
+    button_2_entity:
+      name: Bouton 2 (Rotation anti-horaire - LED 1)
+      description: Entité event pour la rotation dans le sens anti-horaire en position 1
+      selector:
+        entity:
+          filter:
+            - domain: event
+          multiple: false
+
+    button_3_entity:
+      name: Bouton 3 (Clic molette - LED 1)
+      description: Entité event pour les clics sur la molette en position 1
+      selector:
+        entity:
+          filter:
+            - domain: event
+          multiple: false
+
+    # Entités de boutons - Position 2 (LED 2)
+    button_4_entity:
+      name: Bouton 4 (Rotation horaire - LED 2)
+      description: Entité event pour la rotation dans le sens horaire en position 2
+      selector:
+        entity:
+          filter:
+            - domain: event
+          multiple: false
+
+    button_5_entity:
+      name: Bouton 5 (Rotation anti-horaire - LED 2)
+      description: Entité event pour la rotation dans le sens anti-horaire en position 2
+      selector:
+        entity:
+          filter:
+            - domain: event
+          multiple: false
+
+    button_6_entity:
+      name: Bouton 6 (Clic molette - LED 2)
+      description: Entité event pour les clics sur la molette en position 2
+      selector:
+        entity:
+          filter:
+            - domain: event
+          multiple: false
+
+    # Entités de boutons - Position 3 (LED 3)
+    button_7_entity:
+      name: Bouton 7 (Rotation horaire - LED 3)
+      description: Entité event pour la rotation dans le sens horaire en position 3
+      selector:
+        entity:
+          filter:
+            - domain: event
+          multiple: false
+
+    button_8_entity:
+      name: Bouton 8 (Rotation anti-horaire - LED 3)
+      description: Entité event pour la rotation dans le sens anti-horaire en position 3
+      selector:
+        entity:
+          filter:
+            - domain: event
+          multiple: false
+
+    button_9_entity:
+      name: Bouton 9 (Clic molette - LED 3)
+      description: Entité event pour les clics sur la molette en position 3
+      selector:
+        entity:
+          filter:
+            - domain: event
+          multiple: false
+
+    # Lumières pour chaque position LED
+    light_position_1:
+      name: Lumière Position 1 (LED 1)
+      description: Lumière contrôlée quand la LED 1 est allumée
+      default: []
+      selector:
+        entity:
+          filter:
+            - domain: light
+          multiple: false
+
+    light_position_2:
+      name: Lumière Position 2 (LED 2)
+      description: Lumière contrôlée quand la LED 2 est allumée
+      default: []
+      selector:
+        entity:
+          filter:
+            - domain: light
+          multiple: false
+
+    light_position_3:
+      name: Lumière Position 3 (LED 3)
+      description: Lumière contrôlée quand la LED 3 est allumée
+      default: []
+      selector:
+        entity:
+          filter:
+            - domain: light
+          multiple: false
+
+    # Paramètres de luminosité
+    brightness_step:
+      name: Pas de luminosité
+      description: Incrément de luminosité par cran de rotation (en %)
+      default: 10
+      selector:
+        number:
+          min: 1
+          max: 25
+          step: 1
+          unit_of_measurement: "%"
+          mode: slider
+
+    # Actions sur clics
+    click_action:
+      name: Action sur clic simple
+      description: Action à effectuer lors d'un clic simple sur la molette
+      default: toggle
+      selector:
+        select:
+          options:
+            - label: "Allumer/Éteindre (Toggle)"
+              value: "toggle"
+            - label: "Allumer uniquement"
+              value: "turn_on"
+            - label: "Éteindre uniquement"
+              value: "turn_off"
+            - label: "Luminosité 100%"
+              value: "brightness_max"
+            - label: "Luminosité 50%"
+              value: "brightness_50"
+
+    double_click_action:
+      name: Action sur double clic
+      description: Action à effectuer lors d'un double clic sur la molette
+      default: brightness_max
+      selector:
+        select:
+          options:
+            - label: "Aucune action"
+              value: "none"
+            - label: "Allumer/Éteindre (Toggle)"
+              value: "toggle"
+            - label: "Luminosité 100%"
+              value: "brightness_max"
+            - label: "Luminosité 50%"
+              value: "brightness_50"
+            - label: "Luminosité 25%"
+              value: "brightness_25"
+
+    triple_click_action:
+      name: Action sur triple clic
+      description: Action à effectuer lors d'un triple clic sur la molette
+      default: none
+      selector:
+        select:
+          options:
+            - label: "Aucune action"
+              value: "none"
+            - label: "Allumer/Éteindre (Toggle)"
+              value: "toggle"
+            - label: "Luminosité 100%"
+              value: "brightness_max"
+            - label: "Luminosité 1%"
+              value: "brightness_min"
+
+    long_press_action:
+      name: Action sur appui long
+      description: Action à effectuer lors d'un appui long sur la molette
+      default: turn_off
+      selector:
+        select:
+          options:
+            - label: "Aucune action"
+              value: "none"
+            - label: "Éteindre"
+              value: "turn_off"
+            - label: "Allumer/Éteindre (Toggle)"
+              value: "toggle"
+            - label: "Luminosité 100%"
+              value: "brightness_max"
+
+mode: restart
+max_exceeded: silent
+
+variables:
+  light_pos_1: !input light_position_1
+  light_pos_2: !input light_position_2
+  light_pos_3: !input light_position_3
+  step_pct: !input brightness_step
+  step_value: "{{ (step_pct * 255 / 100) | int }}"
+
+trigger:
+  - platform: state
+    entity_id: !input button_1_entity
+    id: button_1_rotation_cw
+
+  - platform: state
+    entity_id: !input button_2_entity
+    id: button_2_rotation_ccw
+
+  - platform: state
+    entity_id: !input button_3_entity
+    id: button_3_click
+
+  - platform: state
+    entity_id: !input button_4_entity
+    id: button_4_rotation_cw
+
+  - platform: state
+    entity_id: !input button_5_entity
+    id: button_5_rotation_ccw
+
+  - platform: state
+    entity_id: !input button_6_entity
+    id: button_6_click
+
+  - platform: state
+    entity_id: !input button_7_entity
+    id: button_7_rotation_cw
+
+  - platform: state
+    entity_id: !input button_8_entity
+    id: button_8_rotation_ccw
+
+  - platform: state
+    entity_id: !input button_9_entity
+    id: button_9_click
+
+action:
+  - variables:
+      click_act: !input click_action
+      double_click_act: !input double_click_action
+      triple_click_act: !input triple_click_action
+      long_press_act: !input long_press_action
+
+  - choose:
+      # ============================================
+      # POSITION 1 (LED 1) - Boutons 1, 2, 3
+      # ============================================
+
+      # Rotation sens horaire - Position 1
+      - conditions:
+          - condition: trigger
+            id: button_1_rotation_cw
+          - "{{ light_pos_1 != '' }}"
+        sequence:
+          - service: light.turn_on
+            target:
+              entity_id: !input light_position_1
+            data:
+              brightness_step: "{{ step_value }}"
+              transition: 0.2
+
+      # Rotation sens anti-horaire - Position 1
+      - conditions:
+          - condition: trigger
+            id: button_2_rotation_ccw
+          - "{{ light_pos_1 != '' }}"
+        sequence:
+          - service: light.turn_on
+            target:
+              entity_id: !input light_position_1
+            data:
+              brightness_step: "{{ -step_value }}"
+              transition: 0.2
+
+      # Clics - Position 1
+      - conditions:
+          - condition: trigger
+            id: button_3_click
+          - "{{ light_pos_1 != '' }}"
+        sequence:
+          - variables:
+              event_type: "{{ trigger.to_state.attributes.event_type }}"
+              target_light: !input light_position_1
+
+          - choose:
+              # Clic simple
+              - conditions: "{{ event_type == 'multi_press_1' }}"
+                sequence:
+                  - choose:
+                      - conditions: "{{ click_act == 'toggle' }}"
+                        sequence:
+                          - service: light.toggle
+                            target:
+                              entity_id: "{{ target_light }}"
+                      - conditions: "{{ click_act == 'turn_on' }}"
+                        sequence:
+                          - service: light.turn_on
+                            target:
+                              entity_id: "{{ target_light }}"
+                      - conditions: "{{ click_act == 'turn_off' }}"
+                        sequence:
+                          - service: light.turn_off
+                            target:
+                              entity_id: "{{ target_light }}"
+                      - conditions: "{{ click_act == 'brightness_max' }}"
+                        sequence:
+                          - service: light.turn_on
+                            target:
+                              entity_id: "{{ target_light }}"
+                            data:
+                              brightness_pct: 100
+                      - conditions: "{{ click_act == 'brightness_50' }}"
+                        sequence:
+                          - service: light.turn_on
+                            target:
+                              entity_id: "{{ target_light }}"
+                            data:
+                              brightness_pct: 50
+
+              # Double clic
+              - conditions: "{{ event_type == 'multi_press_2' }}"
+                sequence:
+                  - choose:
+                      - conditions: "{{ double_click_act == 'toggle' }}"
+                        sequence:
+                          - service: light.toggle
+                            target:
+                              entity_id: "{{ target_light }}"
+                      - conditions: "{{ double_click_act == 'brightness_max' }}"
+                        sequence:
+                          - service: light.turn_on
+                            target:
+                              entity_id: "{{ target_light }}"
+                            data:
+                              brightness_pct: 100
+                      - conditions: "{{ double_click_act == 'brightness_50' }}"
+                        sequence:
+                          - service: light.turn_on
+                            target:
+                              entity_id: "{{ target_light }}"
+                            data:
+                              brightness_pct: 50
+                      - conditions: "{{ double_click_act == 'brightness_25' }}"
+                        sequence:
+                          - service: light.turn_on
+                            target:
+                              entity_id: "{{ target_light }}"
+                            data:
+                              brightness_pct: 25
+
+              # Triple clic
+              - conditions: "{{ event_type == 'multi_press_3' }}"
+                sequence:
+                  - choose:
+                      - conditions: "{{ triple_click_act == 'toggle' }}"
+                        sequence:
+                          - service: light.toggle
+                            target:
+                              entity_id: "{{ target_light }}"
+                      - conditions: "{{ triple_click_act == 'brightness_max' }}"
+                        sequence:
+                          - service: light.turn_on
+                            target:
+                              entity_id: "{{ target_light }}"
+                            data:
+                              brightness_pct: 100
+                      - conditions: "{{ triple_click_act == 'brightness_min' }}"
+                        sequence:
+                          - service: light.turn_on
+                            target:
+                              entity_id: "{{ target_light }}"
+                            data:
+                              brightness_pct: 1
+
+              # Appui long
+              - conditions: "{{ event_type == 'long_press' }}"
+                sequence:
+                  - choose:
+                      - conditions: "{{ long_press_act == 'turn_off' }}"
+                        sequence:
+                          - service: light.turn_off
+                            target:
+                              entity_id: "{{ target_light }}"
+                      - conditions: "{{ long_press_act == 'toggle' }}"
+                        sequence:
+                          - service: light.toggle
+                            target:
+                              entity_id: "{{ target_light }}"
+                      - conditions: "{{ long_press_act == 'brightness_max' }}"
+                        sequence:
+                          - service: light.turn_on
+                            target:
+                              entity_id: "{{ target_light }}"
+                            data:
+                              brightness_pct: 100
+
+      # ============================================
+      # POSITION 2 (LED 2) - Boutons 4, 5, 6
+      # ============================================
+
+      # Rotation sens horaire - Position 2
+      - conditions:
+          - condition: trigger
+            id: button_4_rotation_cw
+          - "{{ light_pos_2 != '' }}"
+        sequence:
+          - service: light.turn_on
+            target:
+              entity_id: !input light_position_2
+            data:
+              brightness_step: "{{ step_value }}"
+              transition: 0.2
+
+      # Rotation sens anti-horaire - Position 2
+      - conditions:
+          - condition: trigger
+            id: button_5_rotation_ccw
+          - "{{ light_pos_2 != '' }}"
+        sequence:
+          - service: light.turn_on
+            target:
+              entity_id: !input light_position_2
+            data:
+              brightness_step: "{{ -step_value }}"
+              transition: 0.2
+
+      # Clics - Position 2
+      - conditions:
+          - condition: trigger
+            id: button_6_click
+          - "{{ light_pos_2 != '' }}"
+        sequence:
+          - variables:
+              event_type: "{{ trigger.to_state.attributes.event_type }}"
+              target_light: !input light_position_2
+
+          - choose:
+              # Clic simple
+              - conditions: "{{ event_type == 'multi_press_1' }}"
+                sequence:
+                  - choose:
+                      - conditions: "{{ click_act == 'toggle' }}"
+                        sequence:
+                          - service: light.toggle
+                            target:
+                              entity_id: "{{ target_light }}"
+                      - conditions: "{{ click_act == 'turn_on' }}"
+                        sequence:
+                          - service: light.turn_on
+                            target:
+                              entity_id: "{{ target_light }}"
+                      - conditions: "{{ click_act == 'turn_off' }}"
+                        sequence:
+                          - service: light.turn_off
+                            target:
+                              entity_id: "{{ target_light }}"
+                      - conditions: "{{ click_act == 'brightness_max' }}"
+                        sequence:
+                          - service: light.turn_on
+                            target:
+                              entity_id: "{{ target_light }}"
+                            data:
+                              brightness_pct: 100
+                      - conditions: "{{ click_act == 'brightness_50' }}"
+                        sequence:
+                          - service: light.turn_on
+                            target:
+                              entity_id: "{{ target_light }}"
+                            data:
+                              brightness_pct: 50
+
+              # Double clic
+              - conditions: "{{ event_type == 'multi_press_2' }}"
+                sequence:
+                  - choose:
+                      - conditions: "{{ double_click_act == 'toggle' }}"
+                        sequence:
+                          - service: light.toggle
+                            target:
+                              entity_id: "{{ target_light }}"
+                      - conditions: "{{ double_click_act == 'brightness_max' }}"
+                        sequence:
+                          - service: light.turn_on
+                            target:
+                              entity_id: "{{ target_light }}"
+                            data:
+                              brightness_pct: 100
+                      - conditions: "{{ double_click_act == 'brightness_50' }}"
+                        sequence:
+                          - service: light.turn_on
+                            target:
+                              entity_id: "{{ target_light }}"
+                            data:
+                              brightness_pct: 50
+                      - conditions: "{{ double_click_act == 'brightness_25' }}"
+                        sequence:
+                          - service: light.turn_on
+                            target:
+                              entity_id: "{{ target_light }}"
+                            data:
+                              brightness_pct: 25
+
+              # Triple clic
+              - conditions: "{{ event_type == 'multi_press_3' }}"
+                sequence:
+                  - choose:
+                      - conditions: "{{ triple_click_act == 'toggle' }}"
+                        sequence:
+                          - service: light.toggle
+                            target:
+                              entity_id: "{{ target_light }}"
+                      - conditions: "{{ triple_click_act == 'brightness_max' }}"
+                        sequence:
+                          - service: light.turn_on
+                            target:
+                              entity_id: "{{ target_light }}"
+                            data:
+                              brightness_pct: 100
+                      - conditions: "{{ triple_click_act == 'brightness_min' }}"
+                        sequence:
+                          - service: light.turn_on
+                            target:
+                              entity_id: "{{ target_light }}"
+                            data:
+                              brightness_pct: 1
+
+              # Appui long
+              - conditions: "{{ event_type == 'long_press' }}"
+                sequence:
+                  - choose:
+                      - conditions: "{{ long_press_act == 'turn_off' }}"
+                        sequence:
+                          - service: light.turn_off
+                            target:
+                              entity_id: "{{ target_light }}"
+                      - conditions: "{{ long_press_act == 'toggle' }}"
+                        sequence:
+                          - service: light.toggle
+                            target:
+                              entity_id: "{{ target_light }}"
+                      - conditions: "{{ long_press_act == 'brightness_max' }}"
+                        sequence:
+                          - service: light.turn_on
+                            target:
+                              entity_id: "{{ target_light }}"
+                            data:
+                              brightness_pct: 100
+
+      # ============================================
+      # POSITION 3 (LED 3) - Boutons 7, 8, 9
+      # ============================================
+
+      # Rotation sens horaire - Position 3
+      - conditions:
+          - condition: trigger
+            id: button_7_rotation_cw
+          - "{{ light_pos_3 != '' }}"
+        sequence:
+          - service: light.turn_on
+            target:
+              entity_id: !input light_position_3
+            data:
+              brightness_step: "{{ step_value }}"
+              transition: 0.2
+
+      # Rotation sens anti-horaire - Position 3
+      - conditions:
+          - condition: trigger
+            id: button_8_rotation_ccw
+          - "{{ light_pos_3 != '' }}"
+        sequence:
+          - service: light.turn_on
+            target:
+              entity_id: !input light_position_3
+            data:
+              brightness_step: "{{ -step_value }}"
+              transition: 0.2
+
+      # Clics - Position 3
+      - conditions:
+          - condition: trigger
+            id: button_9_click
+          - "{{ light_pos_3 != '' }}"
+        sequence:
+          - variables:
+              event_type: "{{ trigger.to_state.attributes.event_type }}"
+              target_light: !input light_position_3
+
+          - choose:
+              # Clic simple
+              - conditions: "{{ event_type == 'multi_press_1' }}"
+                sequence:
+                  - choose:
+                      - conditions: "{{ click_act == 'toggle' }}"
+                        sequence:
+                          - service: light.toggle
+                            target:
+                              entity_id: "{{ target_light }}"
+                      - conditions: "{{ click_act == 'turn_on' }}"
+                        sequence:
+                          - service: light.turn_on
+                            target:
+                              entity_id: "{{ target_light }}"
+                      - conditions: "{{ click_act == 'turn_off' }}"
+                        sequence:
+                          - service: light.turn_off
+                            target:
+                              entity_id: "{{ target_light }}"
+                      - conditions: "{{ click_act == 'brightness_max' }}"
+                        sequence:
+                          - service: light.turn_on
+                            target:
+                              entity_id: "{{ target_light }}"
+                            data:
+                              brightness_pct: 100
+                      - conditions: "{{ click_act == 'brightness_50' }}"
+                        sequence:
+                          - service: light.turn_on
+                            target:
+                              entity_id: "{{ target_light }}"
+                            data:
+                              brightness_pct: 50
+
+              # Double clic
+              - conditions: "{{ event_type == 'multi_press_2' }}"
+                sequence:
+                  - choose:
+                      - conditions: "{{ double_click_act == 'toggle' }}"
+                        sequence:
+                          - service: light.toggle
+                            target:
+                              entity_id: "{{ target_light }}"
+                      - conditions: "{{ double_click_act == 'brightness_max' }}"
+                        sequence:
+                          - service: light.turn_on
+                            target:
+                              entity_id: "{{ target_light }}"
+                            data:
+                              brightness_pct: 100
+                      - conditions: "{{ double_click_act == 'brightness_50' }}"
+                        sequence:
+                          - service: light.turn_on
+                            target:
+                              entity_id: "{{ target_light }}"
+                            data:
+                              brightness_pct: 50
+                      - conditions: "{{ double_click_act == 'brightness_25' }}"
+                        sequence:
+                          - service: light.turn_on
+                            target:
+                              entity_id: "{{ target_light }}"
+                            data:
+                              brightness_pct: 25
+
+              # Triple clic
+              - conditions: "{{ event_type == 'multi_press_3' }}"
+                sequence:
+                  - choose:
+                      - conditions: "{{ triple_click_act == 'toggle' }}"
+                        sequence:
+                          - service: light.toggle
+                            target:
+                              entity_id: "{{ target_light }}"
+                      - conditions: "{{ triple_click_act == 'brightness_max' }}"
+                        sequence:
+                          - service: light.turn_on
+                            target:
+                              entity_id: "{{ target_light }}"
+                            data:
+                              brightness_pct: 100
+                      - conditions: "{{ triple_click_act == 'brightness_min' }}"
+                        sequence:
+                          - service: light.turn_on
+                            target:
+                              entity_id: "{{ target_light }}"
+                            data:
+                              brightness_pct: 1
+
+              # Appui long
+              - conditions: "{{ event_type == 'long_press' }}"
+                sequence:
+                  - choose:
+                      - conditions: "{{ long_press_act == 'turn_off' }}"
+                        sequence:
+                          - service: light.turn_off
+                            target:
+                              entity_id: "{{ target_light }}"
+                      - conditions: "{{ long_press_act == 'toggle' }}"
+                        sequence:
+                          - service: light.toggle
+                            target:
+                              entity_id: "{{ target_light }}"
+                      - conditions: "{{ long_press_act == 'brightness_max' }}"
+                        sequence:
+                          - service: light.turn_on
+                            target:
+                              entity_id: "{{ target_light }}"
+                            data:
+                              brightness_pct: 100

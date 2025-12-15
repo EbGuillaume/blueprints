@@ -1,0 +1,143 @@
+# Exemple d'automatisation utilisant le blueprint IKEA BILRESA
+#
+# Cet exemple montre comment configurer une automatisation pour contrôler 3 lumières
+# avec la télécommande IKEA BILRESA connectée en Matter.
+#
+# IMPORTANT: Remplacez les entités ci-dessous par vos propres entités !
+
+alias: "BILRESA - Contrôle 3 lampes salon"
+description: "Contrôle du plafonnier, lampe d'ambiance et spots de lecture avec BILRESA"
+use_blueprint:
+  path: ikea_bilresa_matter.yaml
+  input:
+    # ===== CONFIGURATION DES BOUTONS =====
+    # Remplacez par les noms exacts de vos entités event BILRESA
+
+    # Position 1 (LED 1) - Plafonnier principal
+    button_1_entity: event.bilresa_scroll_wheel_bouton_1
+    button_2_entity: event.bilresa_scroll_wheel_bouton_2
+    button_3_entity: event.bilresa_scroll_wheel_bouton_3
+
+    # Position 2 (LED 2) - Lampe d'ambiance
+    button_4_entity: event.bilresa_scroll_wheel_bouton_4
+    button_5_entity: event.bilresa_scroll_wheel_bouton_5
+    button_6_entity: event.bilresa_scroll_wheel_bouton_6
+
+    # Position 3 (LED 3) - Spots de lecture
+    button_7_entity: event.bilresa_scroll_wheel_bouton_7
+    button_8_entity: event.bilresa_scroll_wheel_bouton_8
+    button_9_entity: event.bilresa_scroll_wheel_bouton_9
+
+    # ===== CONFIGURATION DES LUMIÈRES =====
+    # Remplacez par vos entités de lumières
+
+    light_position_1: light.plafonnier_salon
+    light_position_2: light.lampe_ambiance_salon
+    light_position_3: light.spots_lecture_salon
+
+    # ===== CONFIGURATION DES PARAMÈTRES =====
+
+    # Incrément de luminosité par cran de rotation (1-25%)
+    brightness_step: 10
+
+    # Action sur clic simple (défaut: toggle)
+    # Options: toggle, turn_on, turn_off, brightness_max, brightness_50
+    click_action: toggle
+
+    # Action sur double clic (défaut: brightness_max)
+    # Options: none, toggle, brightness_max, brightness_50, brightness_25
+    double_click_action: brightness_max
+
+    # Action sur triple clic (défaut: none)
+    # Options: none, toggle, brightness_max, brightness_min
+    triple_click_action: none
+
+    # Action sur appui long (défaut: turn_off)
+    # Options: none, turn_off, toggle, brightness_max
+    long_press_action: turn_off
+
+
+# ============================================================
+# EXEMPLES DE CONFIGURATIONS ALTERNATIVES
+# ============================================================
+
+# --- Exemple 1 : Contrôle d'une seule lumière ---
+# Si vous ne voulez contrôler qu'une seule lumière, vous pouvez
+# laisser light_position_2 et light_position_3 vides (ou ne pas les définir)
+#
+# light_position_1: light.ma_lampe
+# light_position_2: []  # Vide
+# light_position_3: []  # Vide
+
+
+# --- Exemple 2 : Configuration pour chambre ---
+# Position 1: Lumière principale (plafonnier)
+# Position 2: Lampe de chevet
+# Position 3: Bandeau LED
+#
+# light_position_1: light.plafonnier_chambre
+# light_position_2: light.lampe_chevet
+# light_position_3: light.bandeau_led_chambre
+# brightness_step: 15  # Pas plus important pour ajustements rapides
+# click_action: toggle
+# double_click_action: brightness_50  # Double-clic = 50% (lumière tamisée)
+# triple_click_action: brightness_min  # Triple-clic = veilleuse (1%)
+# long_press_action: turn_off
+
+
+# --- Exemple 3 : Configuration pour bureau ---
+# Position 1: Lumière bureau (blanche froide pour travailler)
+# Position 2: Lumière ambiance (chaude pour détente)
+# Position 3: Non utilisée
+#
+# light_position_1: light.bureau_travail
+# light_position_2: light.bureau_ambiance
+# light_position_3: []  # Non utilisée
+# brightness_step: 5  # Ajustements fins
+# click_action: toggle
+# double_click_action: brightness_100
+# triple_click_action: none
+# long_press_action: turn_off
+
+
+# --- Exemple 4 : Configuration personnalisée ---
+# Actions personnalisées selon vos préférences
+#
+# brightness_step: 20  # Grands pas pour changements rapides
+# click_action: turn_on  # Clic simple = toujours allumer
+# double_click_action: brightness_25  # Double-clic = lumière faible
+# triple_click_action: brightness_max  # Triple-clic = lumière maximale
+# long_press_action: toggle  # Appui long = basculer
+
+
+# ============================================================
+# NOTES IMPORTANTES
+# ============================================================
+
+# 1. NOMS DES ENTITÉS
+#    Vérifiez les noms exacts de vos entités dans Home Assistant.
+#    Allez dans Paramètres → Appareils & Services → Matter → Votre BILRESA
+#    et notez les noms exacts des entités event (bouton_1 à bouton_9)
+
+# 2. ORDRE DES BOUTONS
+#    - Boutons 1, 2, 3 = Position LED 1 (première LED)
+#    - Boutons 4, 5, 6 = Position LED 2 (deuxième LED)
+#    - Boutons 7, 8, 9 = Position LED 3 (troisième LED)
+#    Pour chaque position:
+#      - Bouton X1 = Rotation sens horaire
+#      - Bouton X2 = Rotation sens anti-horaire
+#      - Bouton X3 = Clics molette
+
+# 3. TEST DE CONFIGURATION
+#    Après avoir créé l'automatisation:
+#    1. Changez de position LED avec le bouton sous les LEDs
+#    2. Testez la rotation de la molette (luminosité devrait changer)
+#    3. Testez les clics (simple, double, triple, appui long)
+#    4. Vérifiez les logs si quelque chose ne fonctionne pas
+
+# 4. DÉPANNAGE
+#    Si les événements ne se déclenchent pas:
+#    - Allez dans Outils de développement → Événements
+#    - Écoutez "state_changed"
+#    - Appuyez sur les boutons et vérifiez les événements reçus
+#    - Comparez avec les noms d'entités dans votre configuration

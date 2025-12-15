@@ -7,7 +7,7 @@ blueprint:
     - 3 positions LED pour contrôler 3 lumières différentes
     - Rotation de la molette pour ajuster la luminosité (détection fluide)
     - Clics simples, doubles, triples et appui long sur la molette
-    - Configuration simplifiée : sélectionnez juste la télécommande
+    - Configuration semi-automatique : moins d'étapes qu'avant
 
     **Utilisation:**
     - Utilisez le bouton sous les LEDs pour changer de position (LED 1, 2 ou 3)
@@ -17,17 +17,99 @@ blueprint:
   source_url: https://github.com/EbGuillaume/blueprints/blob/main/automation/ikea_bilresa_matter.yaml
 
   input:
-    # Sélection de l'appareil BILRESA
-    bilresa_device:
-      name: Télécommande BILRESA
-      description: Sélectionnez votre télécommande IKEA BILRESA
+    # ========================================
+    # SENSORS DE ROTATION (position_actuelle_du_commutateur)
+    # ========================================
+
+    sensor_rotation_pos1_cw:
+      name: "Sensor Rotation Horaire - Position 1"
+      description: "Sélectionnez: Position actuelle du commutateur (1)"
       selector:
-        device:
+        entity:
           filter:
-            - integration: matter
+            - domain: sensor
           multiple: false
 
-    # Lumières pour chaque position LED
+    sensor_rotation_pos1_ccw:
+      name: "Sensor Rotation Anti-horaire - Position 1"
+      description: "Sélectionnez: Position actuelle du commutateur (2)"
+      selector:
+        entity:
+          filter:
+            - domain: sensor
+          multiple: false
+
+    sensor_rotation_pos2_cw:
+      name: "Sensor Rotation Horaire - Position 2"
+      description: "Sélectionnez: Position actuelle du commutateur (4)"
+      selector:
+        entity:
+          filter:
+            - domain: sensor
+          multiple: false
+
+    sensor_rotation_pos2_ccw:
+      name: "Sensor Rotation Anti-horaire - Position 2"
+      description: "Sélectionnez: Position actuelle du commutateur (5)"
+      selector:
+        entity:
+          filter:
+            - domain: sensor
+          multiple: false
+
+    sensor_rotation_pos3_cw:
+      name: "Sensor Rotation Horaire - Position 3"
+      description: "Sélectionnez: Position actuelle du commutateur (7)"
+      selector:
+        entity:
+          filter:
+            - domain: sensor
+          multiple: false
+
+    sensor_rotation_pos3_ccw:
+      name: "Sensor Rotation Anti-horaire - Position 3"
+      description: "Sélectionnez: Position actuelle du commutateur (8)"
+      selector:
+        entity:
+          filter:
+            - domain: sensor
+          multiple: false
+
+    # ========================================
+    # EVENTS DE CLICS (bouton_X)
+    # ========================================
+
+    event_click_pos1:
+      name: "Event Clics - Position 1"
+      description: "Sélectionnez: Bouton (3)"
+      selector:
+        entity:
+          filter:
+            - domain: event
+          multiple: false
+
+    event_click_pos2:
+      name: "Event Clics - Position 2"
+      description: "Sélectionnez: Bouton (6)"
+      selector:
+        entity:
+          filter:
+            - domain: event
+          multiple: false
+
+    event_click_pos3:
+      name: "Event Clics - Position 3"
+      description: "Sélectionnez: Bouton (9)"
+      selector:
+        entity:
+          filter:
+            - domain: event
+          multiple: false
+
+    # ========================================
+    # LUMIÈRES
+    # ========================================
+
     light_position_1:
       name: Lumière Position 1 (LED 1)
       description: Lumière contrôlée quand la LED 1 est allumée
@@ -58,7 +140,10 @@ blueprint:
             - domain: light
           multiple: false
 
-    # Paramètres de luminosité
+    # ========================================
+    # PARAMÈTRES
+    # ========================================
+
     brightness_step:
       name: Pas de luminosité
       description: Incrément de luminosité par cran de rotation (en %)
@@ -71,7 +156,6 @@ blueprint:
           unit_of_measurement: "%"
           mode: slider
 
-    # Actions sur clics
     click_action:
       name: Action sur clic simple
       description: Action à effectuer lors d'un clic simple sur la molette
@@ -144,28 +228,11 @@ mode: restart
 max_exceeded: silent
 
 variables:
-  device_id: !input bilresa_device
   light_pos_1: !input light_position_1
   light_pos_2: !input light_position_2
   light_pos_3: !input light_position_3
   step_pct: !input brightness_step
   step_value: "{{ (step_pct * 255 / 100) | int }}"
-
-  # Extraction automatique des entités depuis le device
-  all_entities: "{{ device_entities(device_id) }}"
-
-  # Sensors de position (pour rotation de molette) - passent de 0 à 1 à chaque cran
-  sensor_rotation_1_cw: "{{ all_entities | select('search', 'position_actuelle_du_commutateur_1') | list | first }}"
-  sensor_rotation_2_ccw: "{{ all_entities | select('search', 'position_actuelle_du_commutateur_2') | list | first }}"
-  sensor_rotation_4_cw: "{{ all_entities | select('search', 'position_actuelle_du_commutateur_4') | list | first }}"
-  sensor_rotation_5_ccw: "{{ all_entities | select('search', 'position_actuelle_du_commutateur_5') | list | first }}"
-  sensor_rotation_7_cw: "{{ all_entities | select('search', 'position_actuelle_du_commutateur_7') | list | first }}"
-  sensor_rotation_8_ccw: "{{ all_entities | select('search', 'position_actuelle_du_commutateur_8') | list | first }}"
-
-  # Events pour les clics (boutons 3, 6, 9)
-  event_click_3: "{{ all_entities | select('search', 'bouton_3') | list | first }}"
-  event_click_6: "{{ all_entities | select('search', 'bouton_6') | list | first }}"
-  event_click_9: "{{ all_entities | select('search', 'bouton_9') | list | first }}"
 
 trigger:
   # ========================================
@@ -174,20 +241,20 @@ trigger:
 
   # Rotation sens horaire - Position 1 (sensor passe à 1)
   - platform: state
-    entity_id: "{{ sensor_rotation_1_cw }}"
+    entity_id: !input sensor_rotation_pos1_cw
     to: "1"
     id: rotation_1_cw
 
   # Rotation sens anti-horaire - Position 1 (sensor passe à 1)
   - platform: state
-    entity_id: "{{ sensor_rotation_2_ccw }}"
+    entity_id: !input sensor_rotation_pos1_ccw
     to: "1"
-    id: rotation_2_ccw
+    id: rotation_1_ccw
 
   # Clics molette - Position 1
   - platform: state
-    entity_id: "{{ event_click_3 }}"
-    id: click_3
+    entity_id: !input event_click_pos1
+    id: click_1
 
   # ========================================
   # POSITION 2 (LED 2) - Sensors rotation + Event clics
@@ -195,20 +262,20 @@ trigger:
 
   # Rotation sens horaire - Position 2
   - platform: state
-    entity_id: "{{ sensor_rotation_4_cw }}"
+    entity_id: !input sensor_rotation_pos2_cw
     to: "1"
-    id: rotation_4_cw
+    id: rotation_2_cw
 
   # Rotation sens anti-horaire - Position 2
   - platform: state
-    entity_id: "{{ sensor_rotation_5_ccw }}"
+    entity_id: !input sensor_rotation_pos2_ccw
     to: "1"
-    id: rotation_5_ccw
+    id: rotation_2_ccw
 
   # Clics molette - Position 2
   - platform: state
-    entity_id: "{{ event_click_6 }}"
-    id: click_6
+    entity_id: !input event_click_pos2
+    id: click_2
 
   # ========================================
   # POSITION 3 (LED 3) - Sensors rotation + Event clics
@@ -216,20 +283,20 @@ trigger:
 
   # Rotation sens horaire - Position 3
   - platform: state
-    entity_id: "{{ sensor_rotation_7_cw }}"
+    entity_id: !input sensor_rotation_pos3_cw
     to: "1"
-    id: rotation_7_cw
+    id: rotation_3_cw
 
   # Rotation sens anti-horaire - Position 3
   - platform: state
-    entity_id: "{{ sensor_rotation_8_ccw }}"
+    entity_id: !input sensor_rotation_pos3_ccw
     to: "1"
-    id: rotation_8_ccw
+    id: rotation_3_ccw
 
   # Clics molette - Position 3
   - platform: state
-    entity_id: "{{ event_click_9 }}"
-    id: click_9
+    entity_id: !input event_click_pos3
+    id: click_3
 
 action:
   - variables:
@@ -259,7 +326,7 @@ action:
       # Rotation sens anti-horaire - Position 1
       - conditions:
           - condition: trigger
-            id: rotation_2_ccw
+            id: rotation_1_ccw
           - "{{ light_pos_1 != '' and light_pos_1 != [] }}"
         sequence:
           - service: light.turn_on
@@ -272,7 +339,7 @@ action:
       # Clics - Position 1
       - conditions:
           - condition: trigger
-            id: click_3
+            id: click_1
           - "{{ light_pos_1 != '' and light_pos_1 != [] }}"
         sequence:
           - variables:
@@ -398,7 +465,7 @@ action:
       # Rotation sens horaire - Position 2
       - conditions:
           - condition: trigger
-            id: rotation_4_cw
+            id: rotation_2_cw
           - "{{ light_pos_2 != '' and light_pos_2 != [] }}"
         sequence:
           - service: light.turn_on
@@ -411,7 +478,7 @@ action:
       # Rotation sens anti-horaire - Position 2
       - conditions:
           - condition: trigger
-            id: rotation_5_ccw
+            id: rotation_2_ccw
           - "{{ light_pos_2 != '' and light_pos_2 != [] }}"
         sequence:
           - service: light.turn_on
@@ -424,7 +491,7 @@ action:
       # Clics - Position 2
       - conditions:
           - condition: trigger
-            id: click_6
+            id: click_2
           - "{{ light_pos_2 != '' and light_pos_2 != [] }}"
         sequence:
           - variables:
@@ -550,7 +617,7 @@ action:
       # Rotation sens horaire - Position 3
       - conditions:
           - condition: trigger
-            id: rotation_7_cw
+            id: rotation_3_cw
           - "{{ light_pos_3 != '' and light_pos_3 != [] }}"
         sequence:
           - service: light.turn_on
@@ -563,7 +630,7 @@ action:
       # Rotation sens anti-horaire - Position 3
       - conditions:
           - condition: trigger
-            id: rotation_8_ccw
+            id: rotation_3_ccw
           - "{{ light_pos_3 != '' and light_pos_3 != [] }}"
         sequence:
           - service: light.turn_on
@@ -576,7 +643,7 @@ action:
       # Clics - Position 3
       - conditions:
           - condition: trigger
-            id: click_9
+            id: click_3
           - "{{ light_pos_3 != '' and light_pos_3 != [] }}"
         sequence:
           - variables:

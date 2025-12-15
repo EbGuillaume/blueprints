@@ -1,30 +1,104 @@
 blueprint:
-  name: IKEA BILRESA Scroll Wheel Controller (Matter) V2
+  name: IKEA BILRESA Scroll Wheel Controller (Matter)
   description: |
     Contrôlez jusqu'à 3 lumières avec la télécommande IKEA BILRESA connectée en Matter.
 
     **Fonctionnalités:**
     - 3 positions LED pour contrôler 3 lumières différentes
-    - Rotation de la molette pour ajuster la luminosité (détection fluide)
+    - Rotation de la molette pour ajuster la luminosité
     - Clics simples, doubles, triples et appui long sur la molette
-    - Configuration simplifiée : sélectionnez juste la télécommande
+    - Configuration flexible des actions
 
     **Utilisation:**
     - Utilisez le bouton sous les LEDs pour changer de position (LED 1, 2 ou 3)
     - Tournez la molette pour ajuster la luminosité de la lumière active
     - Cliquez sur la molette pour allumer/éteindre ou effectuer d'autres actions
   domain: automation
-  source_url: https://github.com/EbGuillaume/blueprints/blob/main/automation/ikea_bilresa_matter.yaml
+  source_url: https://github.com/your-repo/blueprints/blob/main/automation/ikea_bilresa_matter.yaml
 
   input:
-    # Sélection de l'appareil BILRESA
-    bilresa_device:
-      name: Télécommande BILRESA
-      description: Sélectionnez votre télécommande IKEA BILRESA
+    # Entités de boutons - Position 1 (LED 1)
+    button_1_entity:
+      name: Bouton 1 (Rotation horaire - LED 1)
+      description: Entité event pour la rotation dans le sens horaire en position 1
       selector:
-        device:
+        entity:
           filter:
-            - integration: matter
+            - domain: event
+          multiple: false
+
+    button_2_entity:
+      name: Bouton 2 (Rotation anti-horaire - LED 1)
+      description: Entité event pour la rotation dans le sens anti-horaire en position 1
+      selector:
+        entity:
+          filter:
+            - domain: event
+          multiple: false
+
+    button_3_entity:
+      name: Bouton 3 (Clic molette - LED 1)
+      description: Entité event pour les clics sur la molette en position 1
+      selector:
+        entity:
+          filter:
+            - domain: event
+          multiple: false
+
+    # Entités de boutons - Position 2 (LED 2)
+    button_4_entity:
+      name: Bouton 4 (Rotation horaire - LED 2)
+      description: Entité event pour la rotation dans le sens horaire en position 2
+      selector:
+        entity:
+          filter:
+            - domain: event
+          multiple: false
+
+    button_5_entity:
+      name: Bouton 5 (Rotation anti-horaire - LED 2)
+      description: Entité event pour la rotation dans le sens anti-horaire en position 2
+      selector:
+        entity:
+          filter:
+            - domain: event
+          multiple: false
+
+    button_6_entity:
+      name: Bouton 6 (Clic molette - LED 2)
+      description: Entité event pour les clics sur la molette en position 2
+      selector:
+        entity:
+          filter:
+            - domain: event
+          multiple: false
+
+    # Entités de boutons - Position 3 (LED 3)
+    button_7_entity:
+      name: Bouton 7 (Rotation horaire - LED 3)
+      description: Entité event pour la rotation dans le sens horaire en position 3
+      selector:
+        entity:
+          filter:
+            - domain: event
+          multiple: false
+
+    button_8_entity:
+      name: Bouton 8 (Rotation anti-horaire - LED 3)
+      description: Entité event pour la rotation dans le sens anti-horaire en position 3
+      selector:
+        entity:
+          filter:
+            - domain: event
+          multiple: false
+
+    button_9_entity:
+      name: Bouton 9 (Clic molette - LED 3)
+      description: Entité event pour les clics sur la molette en position 3
+      selector:
+        entity:
+          filter:
+            - domain: event
           multiple: false
 
     # Lumières pour chaque position LED
@@ -144,92 +218,48 @@ mode: restart
 max_exceeded: silent
 
 variables:
-  device_id: !input bilresa_device
   light_pos_1: !input light_position_1
   light_pos_2: !input light_position_2
   light_pos_3: !input light_position_3
   step_pct: !input brightness_step
   step_value: "{{ (step_pct * 255 / 100) | int }}"
 
-  # Extraction automatique des entités depuis le device
-  all_entities: "{{ device_entities(device_id) }}"
-
-  # Sensors de position (pour rotation de molette) - passent de 0 à 1 à chaque cran
-  sensor_rotation_1_cw: "{{ all_entities | select('search', 'position_actuelle_du_commutateur_1') | list | first }}"
-  sensor_rotation_2_ccw: "{{ all_entities | select('search', 'position_actuelle_du_commutateur_2') | list | first }}"
-  sensor_rotation_4_cw: "{{ all_entities | select('search', 'position_actuelle_du_commutateur_4') | list | first }}"
-  sensor_rotation_5_ccw: "{{ all_entities | select('search', 'position_actuelle_du_commutateur_5') | list | first }}"
-  sensor_rotation_7_cw: "{{ all_entities | select('search', 'position_actuelle_du_commutateur_7') | list | first }}"
-  sensor_rotation_8_ccw: "{{ all_entities | select('search', 'position_actuelle_du_commutateur_8') | list | first }}"
-
-  # Events pour les clics (boutons 3, 6, 9)
-  event_click_3: "{{ all_entities | select('search', 'bouton_3') | list | first }}"
-  event_click_6: "{{ all_entities | select('search', 'bouton_6') | list | first }}"
-  event_click_9: "{{ all_entities | select('search', 'bouton_9') | list | first }}"
-
 trigger:
-  # ========================================
-  # POSITION 1 (LED 1) - Sensors rotation + Event clics
-  # ========================================
-
-  # Rotation sens horaire - Position 1 (sensor passe à 1)
   - platform: state
-    entity_id: "{{ sensor_rotation_1_cw }}"
-    to: "1"
-    id: rotation_1_cw
+    entity_id: !input button_1_entity
+    id: button_1_rotation_cw
 
-  # Rotation sens anti-horaire - Position 1 (sensor passe à 1)
   - platform: state
-    entity_id: "{{ sensor_rotation_2_ccw }}"
-    to: "1"
-    id: rotation_2_ccw
+    entity_id: !input button_2_entity
+    id: button_2_rotation_ccw
 
-  # Clics molette - Position 1
   - platform: state
-    entity_id: "{{ event_click_3 }}"
-    id: click_3
+    entity_id: !input button_3_entity
+    id: button_3_click
 
-  # ========================================
-  # POSITION 2 (LED 2) - Sensors rotation + Event clics
-  # ========================================
-
-  # Rotation sens horaire - Position 2
   - platform: state
-    entity_id: "{{ sensor_rotation_4_cw }}"
-    to: "1"
-    id: rotation_4_cw
+    entity_id: !input button_4_entity
+    id: button_4_rotation_cw
 
-  # Rotation sens anti-horaire - Position 2
   - platform: state
-    entity_id: "{{ sensor_rotation_5_ccw }}"
-    to: "1"
-    id: rotation_5_ccw
+    entity_id: !input button_5_entity
+    id: button_5_rotation_ccw
 
-  # Clics molette - Position 2
   - platform: state
-    entity_id: "{{ event_click_6 }}"
-    id: click_6
+    entity_id: !input button_6_entity
+    id: button_6_click
 
-  # ========================================
-  # POSITION 3 (LED 3) - Sensors rotation + Event clics
-  # ========================================
-
-  # Rotation sens horaire - Position 3
   - platform: state
-    entity_id: "{{ sensor_rotation_7_cw }}"
-    to: "1"
-    id: rotation_7_cw
+    entity_id: !input button_7_entity
+    id: button_7_rotation_cw
 
-  # Rotation sens anti-horaire - Position 3
   - platform: state
-    entity_id: "{{ sensor_rotation_8_ccw }}"
-    to: "1"
-    id: rotation_8_ccw
+    entity_id: !input button_8_entity
+    id: button_8_rotation_ccw
 
-  # Clics molette - Position 3
   - platform: state
-    entity_id: "{{ event_click_9 }}"
-    id: click_9
+    entity_id: !input button_9_entity
+    id: button_9_click
 
 action:
   - variables:
@@ -240,40 +270,40 @@ action:
 
   - choose:
       # ============================================
-      # POSITION 1 (LED 1) - Rotation + Clics
+      # POSITION 1 (LED 1) - Boutons 1, 2, 3
       # ============================================
 
       # Rotation sens horaire - Position 1
       - conditions:
           - condition: trigger
-            id: rotation_1_cw
-          - "{{ light_pos_1 != '' and light_pos_1 != [] }}"
+            id: button_1_rotation_cw
+          - "{{ light_pos_1 != '' }}"
         sequence:
           - service: light.turn_on
             target:
               entity_id: !input light_position_1
             data:
               brightness_step: "{{ step_value }}"
-              transition: 0.1
+              transition: 0.2
 
       # Rotation sens anti-horaire - Position 1
       - conditions:
           - condition: trigger
-            id: rotation_2_ccw
-          - "{{ light_pos_1 != '' and light_pos_1 != [] }}"
+            id: button_2_rotation_ccw
+          - "{{ light_pos_1 != '' }}"
         sequence:
           - service: light.turn_on
             target:
               entity_id: !input light_position_1
             data:
               brightness_step: "{{ -step_value }}"
-              transition: 0.1
+              transition: 0.2
 
       # Clics - Position 1
       - conditions:
           - condition: trigger
-            id: click_3
-          - "{{ light_pos_1 != '' and light_pos_1 != [] }}"
+            id: button_3_click
+          - "{{ light_pos_1 != '' }}"
         sequence:
           - variables:
               event_type: "{{ trigger.to_state.attributes.event_type }}"
@@ -315,7 +345,7 @@ action:
                               brightness_pct: 50
 
               # Double clic
-              - conditions: "{{ event_type == 'multi_press_2' and double_click_act != 'none' }}"
+              - conditions: "{{ event_type == 'multi_press_2' }}"
                 sequence:
                   - choose:
                       - conditions: "{{ double_click_act == 'toggle' }}"
@@ -346,7 +376,7 @@ action:
                               brightness_pct: 25
 
               # Triple clic
-              - conditions: "{{ event_type == 'multi_press_3' and triple_click_act != 'none' }}"
+              - conditions: "{{ event_type == 'multi_press_3' }}"
                 sequence:
                   - choose:
                       - conditions: "{{ triple_click_act == 'toggle' }}"
@@ -370,7 +400,7 @@ action:
                               brightness_pct: 1
 
               # Appui long
-              - conditions: "{{ event_type == 'long_press' and long_press_act != 'none' }}"
+              - conditions: "{{ event_type == 'long_press' }}"
                 sequence:
                   - choose:
                       - conditions: "{{ long_press_act == 'turn_off' }}"
@@ -392,40 +422,40 @@ action:
                               brightness_pct: 100
 
       # ============================================
-      # POSITION 2 (LED 2) - Rotation + Clics
+      # POSITION 2 (LED 2) - Boutons 4, 5, 6
       # ============================================
 
       # Rotation sens horaire - Position 2
       - conditions:
           - condition: trigger
-            id: rotation_4_cw
-          - "{{ light_pos_2 != '' and light_pos_2 != [] }}"
+            id: button_4_rotation_cw
+          - "{{ light_pos_2 != '' }}"
         sequence:
           - service: light.turn_on
             target:
               entity_id: !input light_position_2
             data:
               brightness_step: "{{ step_value }}"
-              transition: 0.1
+              transition: 0.2
 
       # Rotation sens anti-horaire - Position 2
       - conditions:
           - condition: trigger
-            id: rotation_5_ccw
-          - "{{ light_pos_2 != '' and light_pos_2 != [] }}"
+            id: button_5_rotation_ccw
+          - "{{ light_pos_2 != '' }}"
         sequence:
           - service: light.turn_on
             target:
               entity_id: !input light_position_2
             data:
               brightness_step: "{{ -step_value }}"
-              transition: 0.1
+              transition: 0.2
 
       # Clics - Position 2
       - conditions:
           - condition: trigger
-            id: click_6
-          - "{{ light_pos_2 != '' and light_pos_2 != [] }}"
+            id: button_6_click
+          - "{{ light_pos_2 != '' }}"
         sequence:
           - variables:
               event_type: "{{ trigger.to_state.attributes.event_type }}"
@@ -467,7 +497,7 @@ action:
                               brightness_pct: 50
 
               # Double clic
-              - conditions: "{{ event_type == 'multi_press_2' and double_click_act != 'none' }}"
+              - conditions: "{{ event_type == 'multi_press_2' }}"
                 sequence:
                   - choose:
                       - conditions: "{{ double_click_act == 'toggle' }}"
@@ -498,7 +528,7 @@ action:
                               brightness_pct: 25
 
               # Triple clic
-              - conditions: "{{ event_type == 'multi_press_3' and triple_click_act != 'none' }}"
+              - conditions: "{{ event_type == 'multi_press_3' }}"
                 sequence:
                   - choose:
                       - conditions: "{{ triple_click_act == 'toggle' }}"
@@ -522,7 +552,7 @@ action:
                               brightness_pct: 1
 
               # Appui long
-              - conditions: "{{ event_type == 'long_press' and long_press_act != 'none' }}"
+              - conditions: "{{ event_type == 'long_press' }}"
                 sequence:
                   - choose:
                       - conditions: "{{ long_press_act == 'turn_off' }}"
@@ -544,40 +574,40 @@ action:
                               brightness_pct: 100
 
       # ============================================
-      # POSITION 3 (LED 3) - Rotation + Clics
+      # POSITION 3 (LED 3) - Boutons 7, 8, 9
       # ============================================
 
       # Rotation sens horaire - Position 3
       - conditions:
           - condition: trigger
-            id: rotation_7_cw
-          - "{{ light_pos_3 != '' and light_pos_3 != [] }}"
+            id: button_7_rotation_cw
+          - "{{ light_pos_3 != '' }}"
         sequence:
           - service: light.turn_on
             target:
               entity_id: !input light_position_3
             data:
               brightness_step: "{{ step_value }}"
-              transition: 0.1
+              transition: 0.2
 
       # Rotation sens anti-horaire - Position 3
       - conditions:
           - condition: trigger
-            id: rotation_8_ccw
-          - "{{ light_pos_3 != '' and light_pos_3 != [] }}"
+            id: button_8_rotation_ccw
+          - "{{ light_pos_3 != '' }}"
         sequence:
           - service: light.turn_on
             target:
               entity_id: !input light_position_3
             data:
               brightness_step: "{{ -step_value }}"
-              transition: 0.1
+              transition: 0.2
 
       # Clics - Position 3
       - conditions:
           - condition: trigger
-            id: click_9
-          - "{{ light_pos_3 != '' and light_pos_3 != [] }}"
+            id: button_9_click
+          - "{{ light_pos_3 != '' }}"
         sequence:
           - variables:
               event_type: "{{ trigger.to_state.attributes.event_type }}"
@@ -619,7 +649,7 @@ action:
                               brightness_pct: 50
 
               # Double clic
-              - conditions: "{{ event_type == 'multi_press_2' and double_click_act != 'none' }}"
+              - conditions: "{{ event_type == 'multi_press_2' }}"
                 sequence:
                   - choose:
                       - conditions: "{{ double_click_act == 'toggle' }}"
@@ -650,7 +680,7 @@ action:
                               brightness_pct: 25
 
               # Triple clic
-              - conditions: "{{ event_type == 'multi_press_3' and triple_click_act != 'none' }}"
+              - conditions: "{{ event_type == 'multi_press_3' }}"
                 sequence:
                   - choose:
                       - conditions: "{{ triple_click_act == 'toggle' }}"
@@ -674,7 +704,7 @@ action:
                               brightness_pct: 1
 
               # Appui long
-              - conditions: "{{ event_type == 'long_press' and long_press_act != 'none' }}"
+              - conditions: "{{ event_type == 'long_press' }}"
                 sequence:
                   - choose:
                       - conditions: "{{ long_press_act == 'turn_off' }}"
